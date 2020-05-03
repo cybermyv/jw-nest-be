@@ -1,0 +1,9 @@
+{
+    "sqltools.connections": [
+        {
+            "database": "${workspaceFolder}\\dbase/jwd.db",
+            "dialect": "SQLite",
+            "name": "jdb"
+        }
+    ]
+}
