@@ -29,7 +29,8 @@ export class GroupController {
 
     @Post('create')
     @HttpCode(201)
-    public async create(@Body() groupData: Group) {
+    public async create(
+        @Body() groupData: Group) {
         try {
             const {isVisible, name, description} = groupData;
 
