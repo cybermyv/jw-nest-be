@@ -22,6 +22,17 @@ export class ProductService {
         private imglinkRepository: Repository<IMGLink>,
     ) { }
 
+    private async findId(id: number): Promise<Product> {
+
+        // console.log('id', id);
+
+        const result  = await this.productRepository.findOne(id);
+
+        // console.log('result', result)
+
+        return result;
+    }
+
     public async getAllProduct(): Promise<Product[]> {
         return await this.productRepository.find();
     }
@@ -46,7 +57,16 @@ export class ProductService {
     }
 
     public async deleteProduct(id: number) {
-        return await this.productRepository.query('delete from product where id =?', [id])
+        const exist = await this.findId(id);
+
+        if(exist) {
+            await this.productRepository.query('delete from product where id =?', [id]);
+
+            return {id: id}
+        } else {
+            
+            return 'Запись для удаления не найдена';
+        }
     }
 
     public async addImageLink(id: number, path: string): Promise<IMGLink> {

@@ -85,33 +85,22 @@ export class ProductController {
         @UploadedFile() file) {        
             if (file) {
                 const image = file;
-                console.log(image);
                 const path = image.path;
                 const fileName = image.originalname;
 
                 // -- создать из файла base64, подсунуть его в thumbnail
                 const thumb = fs.readFileSync(path).toString('base64');    
                 const prefix = 'data:' + image.mimetype + ';base64,';           
-
-                console.log('thumb', thumb.slice(0, 255));
-
+                
                 try {
                     const thumbnail: string = prefix + thumb;
                     const { name, description, weight, matter, stone, stone_number, jwgroup, file } = product;
-
                     const newProduct =  await this.productService.createProduct({ name, description, weight, matter, stone, stone_number, thumbnail, jwgroup });
-
-                    console.log('newProduct.id', newProduct.id);
-
                     const newImageLink = await this.productService.addImageLink(newProduct.id, path);
-
-                    console.log('newImageLink.id', newImageLink);
 
                 } catch (e) {
                     throw new HttpException('Error save product', HttpStatus.INTERNAL_SERVER_ERROR);
                 }
-
-                
 
             } else {
                 console.log('file not upload');
@@ -119,26 +108,6 @@ export class ProductController {
             }
 
             const { name, description, weight, matter, stone, stone_number, jwgroup } = product;
-
-            
-
-        //     try {
-        //         const thumbnail: string = thumb;
-
-        //         return await this.productService.createProduct({ name, description, weight, matter, stone, stone_number, thumbnail, jwgroup })
-
-
-        //     // const { name, description, weight, matter, stone, stone_number, jwgroup, file } = product;
-            
-
-        //     // -- создать новый продукт 1. смаппить product на структуру для записи. 2. сохранить. 3. вернуть id_product
-        //     // return await product;
-
-        // } catch (e) {
-        //     throw new HttpException('Error save product', HttpStatus.INTERNAL_SERVER_ERROR);
-
-        // }
-
     }
 
 
@@ -166,9 +135,19 @@ export class ProductController {
         @Param('id') id: number,
         @Res() res: Response
     ) {
+        
+        // -- при удалении изделия надо удалять картинку из хранилища 
         try {
 
-            return await this.productService.deleteProduct(id);
+            // return await this.productService.deleteProduct(id);
+
+            const result = await this.productService.deleteProduct(id);
+            
+            if(result instanceof Object) {
+                return res.status(HttpStatus.OK).json({data: result});   
+            }
+
+            return res.status(HttpStatus.NOT_FOUND).json({error: result});
 
         } catch (e) {
             throw new HttpException('Error delete product', HttpStatus.INTERNAL_SERVER_ERROR);
