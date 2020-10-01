@@ -51,8 +51,12 @@ export class GroupService {
             await this.groupRepository.query('update jwgroup set name =?, description =? where id =?', [group.name, group.description, id]);
 
             const result = await this.findId(id);
+
             return result;
-        } else { return 'Не найдена запись для редактирования!'}
+        } else {
+            
+            return 'Не найдена запись для редактирования!';
+        }
     }
 
     public async delete (id: number) {
@@ -61,8 +65,10 @@ export class GroupService {
 
         if (exist) {
             await this.groupRepository.query('delete from jwgroup where id =?', [id]);
+
             return {id: id};
         } else {
+
             return 'Запись для удаления не найдена'
         } 
     }

@@ -23,6 +23,23 @@ export class ProductController {
         return await this.productService.getAllProduct();
     }
 
+    @Get(':id')
+    @HttpCode(200)
+    public async getProductById(@Param('id') id: number, @Res() res: Response): Promise<Product | object> {
+        try {
+           const result = await this.productService.getProductById(id);
+
+            if(result instanceof Object) {
+                return res.status(HttpStatus.OK).json(result);   
+            }
+
+            return res.status(HttpStatus.NOT_FOUND).json({error: result});
+
+        } catch(e) {
+            throw new HttpException('Error fetch product', HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @Get(':jwgroup/group')
     @HttpCode(200)
     public async getProductByGroup(@Param('jwgroup') jwgroup: number): Promise<Product[]> {
@@ -119,10 +136,15 @@ export class ProductController {
         @Res() res: Response
     ) {
         try {
+            const { name, description, weight, matter, stone, stone_number, jwgroup } = productData;
 
-            const { name, description, weight, matter, stone, stone_number, thumbnail, jwgroup } = productData;
+            const result = await this.productService.updateProduct(id, { name, description, weight, matter, stone, stone_number, jwgroup });
 
-            return await this.productService.updateProduct(id, { name, description, weight, matter, stone, stone_number, thumbnail, jwgroup });
+            if(result instanceof Product) {
+                return res.status(HttpStatus.OK).json({data: result})
+            }
+
+            return res.status(HttpStatus.NOT_FOUND).json({error: result})
 
         } catch (e) {
             throw new HttpException('Error update product', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -138,8 +160,6 @@ export class ProductController {
         
         // -- при удалении изделия надо удалять картинку из хранилища 
         try {
-
-            // return await this.productService.deleteProduct(id);
 
             const result = await this.productService.deleteProduct(id);
             

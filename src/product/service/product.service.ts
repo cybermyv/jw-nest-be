@@ -23,14 +23,7 @@ export class ProductService {
     ) { }
 
     private async findId(id: number): Promise<Product> {
-
-        // console.log('id', id);
-
-        const result  = await this.productRepository.findOne(id);
-
-        // console.log('result', result)
-
-        return result;
+        return await this.productRepository.findOne(id);        
     }
 
     public async getAllProduct(): Promise<Product[]> {
@@ -38,11 +31,23 @@ export class ProductService {
     }
 
     public async getProductByGroup(jwgroup: number): Promise<Product[]> {
-        if (jwgroup == 0) { return await this.productRepository.find() }
-        else {
-            return await this.productRepository.find({
-                where: { jwgroup: jwgroup }
+
+        if (jwgroup === 0) { return await this.productRepository.find() }
+            else {
+        
+                return await this.productRepository.find({
+                    where: { jwgroup: jwgroup }
             })
+        }
+    }
+
+    public async getProductById(id: number): Promise<Product | string> {
+        const result = await this.findId(id);
+
+        if (result) {
+            return result;
+        } else {
+            return 'Изделие не найденo';
         }
     }
 
@@ -50,21 +55,32 @@ export class ProductService {
         return await this.productRepository.save(product);
     }
 
-    public async updateProduct(id: number, product: Partial<Product>): Promise<Product> {
-        return await this.productRepository.query('update product set name =?, description =?, weight =?, matter =?, stone =?, stone_number =?, thumbnail =? where id =?', [
-            product.name, product.description, product.weight, product.matter, product.stone, product.stone_number, product.thumbnail, id])
+    public async updateProduct(id: number, product: Partial<Product>) {
+        const exist = await this.findId(id);
+
+        if (exist) {
+            await this.productRepository.query('update product set name =?, description =?, weight =?, matter =?, stone =?, stone_number =?, jwgroup =? where id =?', [
+                product.name, product.description, product.weight, product.matter, product.stone, product.stone_number, product.jwgroup, id]);
+
+            const result = await this.findId(id);
+
+            return result;
+        } else {
+
+            return 'Запись для обновления не найдена';
+        }
 
     }
 
     public async deleteProduct(id: number) {
         const exist = await this.findId(id);
 
-        if(exist) {
+        if (exist) {
             await this.productRepository.query('delete from product where id =?', [id]);
 
-            return {id: id}
+            return { id: id }
         } else {
-            
+
             return 'Запись для удаления не найдена';
         }
     }

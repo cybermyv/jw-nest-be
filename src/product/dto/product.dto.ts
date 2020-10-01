@@ -74,7 +74,7 @@ export class ProductUpload {
 
     @ApiProperty({ type: 'string', format: 'binary' })
     @IsNotEmpty()    
-    file: any;   
+    file?: any;   
 }
 
 @Entity({ name: 'matter' })
