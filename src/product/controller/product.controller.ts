@@ -23,6 +23,12 @@ export class ProductController {
         return await this.productService.getAllProduct();
     }
 
+    @Get('query')
+    @HttpCode(200)
+    public async getAllQuery(): Promise<Product[]> {
+        return await this.productService.getAllCompositeQuery();
+    }
+
     @Get(':id')
     @HttpCode(200)
     public async getProductById(@Param('id') id: number, @Res() res: Response): Promise<Product | object> {
@@ -49,9 +55,6 @@ export class ProductController {
     @Post('create')
     @HttpCode(201)
     public async createProduct(@Body() productData: Product) {
-
-        console.log(productData);
-
         try {
             const { name, description, weight, matter, stone, stone_number, thumbnail, jwgroup } = productData;
 
@@ -173,4 +176,6 @@ export class ProductController {
             throw new HttpException('Error delete product', HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
 }

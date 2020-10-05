@@ -1,6 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn } from 'typeorm';
 import { IsNotEmpty } from 'class-validator'
+import {Group} from './../../group/dto/group.dto';
+
+
+
+@Entity({ name: 'matter' })
+export class Matter {
+    @ApiProperty()
+    @PrimaryGeneratedColumn()
+    id?: number;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    @Column()
+    name: string;    
+}
+
 
 @Entity({ name: 'product' })
 export class Product {
@@ -22,11 +38,6 @@ export class Product {
     @IsNotEmpty()
     @Column()
     weight: number;
-   
-    @ApiProperty()
-    @IsNotEmpty()
-    @Column()
-    matter: number;
 
     @ApiProperty()
     @IsNotEmpty()
@@ -47,6 +58,11 @@ export class Product {
     @IsNotEmpty()
     @Column()
     jwgroup: number;
+    
+    @ApiProperty()
+    @IsNotEmpty()
+    @Column()
+    matter: number;   
 }
 
 
@@ -77,17 +93,62 @@ export class ProductUpload {
     file?: any;   
 }
 
-@Entity({ name: 'matter' })
-export class Matter {
-    @ApiProperty()
-    @PrimaryGeneratedColumn()
-    id?: number;
+// @Entity({ name: 'productJoin' })
+// export class ProductJoin {
+//     @ApiProperty()
+//     @PrimaryGeneratedColumn()
+//     id?: number;
 
-    @ApiProperty()
-    @IsNotEmpty()
-    @Column()
-    name: string;    
-}
+//     @ApiProperty()
+//     @IsNotEmpty()
+//     @Column()
+//     name: string;    
+
+//     @ApiProperty()
+//     @IsNotEmpty()
+//     @Column()
+//     description: string;
+
+//     @ApiProperty()
+//     @IsNotEmpty()
+//     @Column()
+//     weight: number;
+
+//     @ApiProperty()
+//     @IsNotEmpty()
+//     @Column()
+//     stone: string;
+
+//     @ApiProperty()
+//     @IsNotEmpty()
+//     @Column()
+//     stone_number: number;
+
+//     @ApiProperty()
+//     @IsNotEmpty()
+//     @Column()
+//     thumbnail: string;
+    
+//     @ApiProperty()
+//     @IsNotEmpty()
+//     @Column()
+//     jwgroup: number;
+    
+//     @ApiProperty()
+//     @IsNotEmpty()
+//     @Column()
+//     matter: number;
+
+//     // @OneToOne( type => Matter)
+//     // @JoinColumn()
+//     // mat: Matter;
+
+//     @OneToOne( type => Group)
+//     @JoinColumn()
+//     gr: Group;
+// }
+
+
 
 @Entity({ name: 'pm_link' })
 export class PMLink {
