@@ -11,6 +11,7 @@ import { DictModule } from './dict/dict.module';
 import { ImgUploadModule } from './img-upload/img-upload.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [GroupModule,
@@ -31,6 +32,7 @@ import { diskStorage } from 'multer';
     AuthModule,
     DictModule,
     ImgUploadModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [AppService,],
