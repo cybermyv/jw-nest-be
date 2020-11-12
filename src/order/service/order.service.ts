@@ -103,9 +103,7 @@ export class OrderService {
         try {
             return await this.orderDetailRepository.find({
                 where: { order_id: id }
-            }
-                
-            );
+            });
         } catch (e) {
 
             console.log(e);
@@ -118,9 +116,7 @@ export class OrderService {
         try {
             return await this.orderRepository.findOne({
                 where: { id: id }
-            }
-                
-            );
+            });
         } catch (e) {
 
             console.log(e);
@@ -134,9 +130,7 @@ export class OrderService {
         try {
             return await this.statusOrderRepository.find({
                 where: { order_id: id }
-            }
-                
-            );
+            });
         } catch (e) {
 
             console.log(e);
@@ -149,9 +143,7 @@ export class OrderService {
         try {
             return await this.statusDetailRepository.find({
                 where: { detail_id: id }
-            }
-                
-            );
+            });
         } catch (e) {
 
             console.log(e);
@@ -205,9 +197,7 @@ export class OrderService {
             // -- добавить название изделия и еще какие-то нужные данные.
             return item;
                 
-        }));
-
-              
+        }));              
 
         return order;
     }
@@ -319,6 +309,72 @@ export class OrderService {
             }
 
         }
+    }
+
+    private async findDetailById(id: any) {
+        return await this.orderDetailRepository.findByIds(id, {take: 1})
+    }
+
+    public async updateDetailPrice(id: number, price: number) {
+
+        const exist = await this.findDetailById(id);
+
+        // console.log(' Обновление детали заказа' ,exist);
+
+        if (exist) {
+            await this.orderDetailRepository.query('update order_detail set price =? where id =?', [price, id]);
+
+            return await this.findDetailById(id);
+
+        } else {
+
+            return 'Запись для обновления не найдена';
+        }
+
+    }
+
+    public async updateDetailNote(id: number, note: string) {
+        const exist = await this.findDetailById(id);
+                
+        if(!exist) {
+            return 'Запись для обновления не найдена';
+        };
+
+        if (note === '' || note === '...') {
+
+            return 'Значение не подходить для обновления';
+        };
+
+       await this.orderDetailRepository.query('update order_detail set note =? where id =?', [note, id])
+
+       return await this.findDetailById(id);
+    }
+
+    public async getDetailsByOrder(id: number): Promise<any[]> {
+        // TODO - проверка на валидность id order
+
+        const detail$ = await  this.orderDetailRepository.find({
+            where: { order_id: id }
+        });
+
+        const data: any = detail$;
+
+        await Promise.all(data.map( async item => {
+          const currentStatusDescriptopn =  await this.getStatusById(item.current_status_id);
+          item.currentStatusDescriptopn =  currentStatusDescriptopn.description; 
+                   
+          return item;              
+      }));
+
+      return data;
+    }
+
+    public async deleteDetail(id: number) {
+        // TODO - проверка на валидность идентификатора. Есть или нет такая деталь в заказе
+
+        await this.orderDetailRepository.query('delete from order_detail where id =?',[id]);
+
+        return {id: id}
     }
 
 
