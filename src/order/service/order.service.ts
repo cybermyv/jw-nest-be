@@ -377,5 +377,56 @@ export class OrderService {
         return {id: id}
     }
 
+    public async updateOrderDescription(id: number, description: string) {
+        const exist = await this.getOrderById(id);
+
+        if(exist) {
+           await this.orderRepository.update(id, {description});
+            
+            return await this.getOrderAdditionalAtribute(id);
+        }
+    }
+
+    public async updateOrderCost(id: number, total_cost: number) {
+        const exist = await this.getOrderById(id);
+
+        if(exist) {
+            // await this.orderRepository.query('update order as ord set total_cost=? where id =?', [cost, id]); ошибка, потому что в sql order зарезервированное слово
+            
+            await this.orderRepository.update(id, {total_cost});
+            return await this.getOrderAdditionalAtribute(id);
+        }
+    }
+
+    //  getOrderById(id: number): Promise<Order>  - нужно будет дополнять чем-то (названием текущего статуса)
+
+    private async getOrderAdditionalAtribute(id: number) {
+
+        const order: any = await this.getOrderById(id); 
+
+        const currentStatusDescriptopn =  await this.getStatusById(order.current_status_id);
+        order.currentStatusDescriptopn = currentStatusDescriptopn.description; 
+
+        return order;
+    }
+
+    public async getFullOrderById(id){
+        return await this.getOrderAdditionalAtribute(id);
+    } 
+
+    public async acceptOrder(id) {
+
+        const exist = await this.getOrderById(id);
+
+        if (exist.current_status_id === 1) {
+            const current_status_id = 2;
+            await this.orderRepository.update(id, {current_status_id});
+            await this.setHistoryStatus('order', current_status_id, id);
+
+            return await this.getOrderAdditionalAtribute(id);
+        }
+    }
+
+
 
 }

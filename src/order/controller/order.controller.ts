@@ -51,11 +51,10 @@ export class OrderController {
         @Res() res: Response
     ) {
 
-        console.log(id);
         try {
             const param = Object.values(price)[0];
 
-            console.log('id ', id, 'tmp',Object.values(price)[0], 'price - ', price);
+            // console.log('id ', id, 'tmp',Object.values(price)[0], 'price - ', price);
             const result = await this.orderService.updateDetailPrice(id, param);
 
             return res.status(HttpStatus.OK).json({data: result});
@@ -134,6 +133,77 @@ export class OrderController {
 
         } catch(e) {
             throw new HttpException('Error delete detail', HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @Put(':id/updateOrderDesc')
+    @HttpCode(200)
+    public async updateOrderDesc(
+        @Param('id') id: number,
+        @Body() description: string,
+        @Res() res: Response
+    ) {
+        try {
+
+            console.log(description)
+            const param = Object.values(description)[0];
+            console.log(param)
+            const result = await this.orderService.updateOrderDescription(id, param);
+            
+            
+            return res.status(HttpStatus.OK).json({data: result});
+        } catch(e) {
+            console.log(e);
+            throw new HttpException('Error update order description', HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Put(':id/updateOrderCost')
+    @HttpCode(200)
+    public async updateOrderCost(
+        @Param('id') id: number,
+        @Body() cost: number,
+        @Res() res: Response
+    ) {
+        try {
+            const param = Object.values(cost)[0];
+            const result = await this.orderService.updateOrderCost(id, param);
+            
+            return res.status(HttpStatus.OK).json({data: result});
+        } catch(e) {
+            console.log(e);
+            throw new HttpException('Error update order description', HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @Get(':id/fullOrder')
+    @HttpCode(200)
+    public async getFullOrderById(
+        @Param('id') id: number,
+        // @Res() res: Response
+    ) {
+        try {
+
+            return await this.orderService.getFullOrderById(id);           
+
+        } catch (e) { throw new HttpException('Error fetch detail by order', HttpStatus.INTERNAL_SERVER_ERROR); }
+    }
+    
+    @Post(':id/accept')
+    @HttpCode(200)
+    public async acceptOrder(
+        @Param('id') id: number,
+        @Res() res: Response)
+    {
+        try {
+
+            const result = await this.orderService.acceptOrder(id);
+            return res.status(HttpStatus.OK).json({data: result});
+
+        } catch(e) {
+            throw new HttpException('Error accept order', HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
         
