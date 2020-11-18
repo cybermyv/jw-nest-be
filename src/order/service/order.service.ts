@@ -11,8 +11,7 @@ import { StatusOrderHistory } from '../dto/status-order-history.dto';
 
 import { ProductService } from 'src/product/service/product.service';
 import { Product } from 'src/product/dto/product.dto';
-import { promises } from 'dns';
-import { Stats } from 'fs';
+
 
 
 
@@ -37,6 +36,8 @@ export class OrderService {
         private statusOrderRepository: Repository<StatusOrderHistory>,
 
         private product: ProductService,
+        // @InjectRepository(Product)
+        // private product: Repository<Product>,
 
 
     ) { }
@@ -195,6 +196,10 @@ export class OrderService {
             item.statusHistory = await this.getAllStatusByDetailId(item.id);
 
             // -- добавить название изделия и еще какие-то нужные данные.
+
+            const product: any = await this.product.getProductById(item.product_id);
+            item.productName = product.name;
+            item.thumb = product.thumbnail;
             return item;
                 
         }));              
@@ -204,6 +209,8 @@ export class OrderService {
 
 
     private async newOrder(productId: number): Promise<Order | string> {
+
+        // ПРОДУКТ
         const product: any = await this.product.getProductById(productId);
 
         if (product.id) {
@@ -319,32 +326,27 @@ export class OrderService {
 
         const exist = await this.findDetailById(id);
 
-        // console.log(' Обновление детали заказа' ,exist);
-
         if (exist) {
             await this.orderDetailRepository.query('update order_detail set price =? where id =?', [price, id]);
 
             return await this.findDetailById(id);
-
+            
         } else {
 
             return 'Запись для обновления не найдена';
         }
-
     }
 
     public async updateDetailNote(id: number, note: string) {
-        const exist = await this.findDetailById(id);
-                
+        const exist = await this.findDetailById(id);                
         if(!exist) {
+          
             return 'Запись для обновления не найдена';
         };
-
         if (note === '' || note === '...') {
 
             return 'Значение не подходить для обновления';
         };
-
        await this.orderDetailRepository.query('update order_detail set note =? where id =?', [note, id])
 
        return await this.findDetailById(id);
@@ -362,6 +364,10 @@ export class OrderService {
         await Promise.all(data.map( async item => {
           const currentStatusDescriptopn =  await this.getStatusById(item.current_status_id);
           item.currentStatusDescriptopn =  currentStatusDescriptopn.description; 
+
+          const product: any = await this.product.getProductById(item.product_id);
+          item.productName = product.name;
+          item.thumb = product.thumbnail;
                    
           return item;              
       }));
@@ -371,7 +377,6 @@ export class OrderService {
 
     public async deleteDetail(id: number) {
         // TODO - проверка на валидность идентификатора. Есть или нет такая деталь в заказе
-
         await this.orderDetailRepository.query('delete from order_detail where id =?',[id]);
 
         return {id: id}
@@ -425,6 +430,10 @@ export class OrderService {
 
             return await this.getOrderAdditionalAtribute(id);
         }
+    }
+
+    public async getPartialProduct (id: number) {
+
     }
 
 
