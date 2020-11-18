@@ -63,6 +63,10 @@ export class Product {
     @IsNotEmpty()
     @Column()
     matter: number;   
+
+    @ApiProperty()
+    @Column()
+    price: number;
 }
 
 
@@ -87,6 +91,9 @@ export class ProductUpload {
        
     @ApiProperty()
     jwgroup: number;
+
+    @ApiProperty()
+    price: number;
 
     @ApiProperty({ type: 'string', format: 'binary' })
     @IsNotEmpty()    

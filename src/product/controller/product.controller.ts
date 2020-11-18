@@ -56,9 +56,9 @@ export class ProductController {
     @HttpCode(201)
     public async createProduct(@Body() productData: Product) {
         try {
-            const { name, description, weight, matter, stone, stone_number, thumbnail, jwgroup } = productData;
+            const { name, description, weight, matter, stone, stone_number, thumbnail, jwgroup, price } = productData;
 
-            return await this.productService.createProduct({ name, description, weight, matter, stone, stone_number, thumbnail, jwgroup })
+            return await this.productService.createProduct({ name, description, weight, matter, stone, stone_number, thumbnail, jwgroup, price })
 
         } catch (e) {
             throw new HttpException('Error create product', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -114,8 +114,8 @@ export class ProductController {
                 
                 try {
                     const thumbnail: string = prefix + thumb;
-                    const { name, description, weight, matter, stone, stone_number, jwgroup, file } = product;
-                    const newProduct =  await this.productService.createProduct({ name, description, weight, matter, stone, stone_number, thumbnail, jwgroup });
+                    const { name, description, weight, matter, stone, stone_number, jwgroup, price, file } = product;
+                    const newProduct =  await this.productService.createProduct({ name, description, weight, matter, stone, stone_number, thumbnail, jwgroup, price });
                     const newImageLink = await this.productService.addImageLink(newProduct.id, path);
 
                 } catch (e) {
@@ -139,9 +139,9 @@ export class ProductController {
         @Res() res: Response
     ) {
         try {
-            const { name, description, weight, matter, stone, stone_number, jwgroup } = productData;
+            const { name, description, weight, matter, stone, stone_number, jwgroup, price } = productData;
 
-            const result = await this.productService.updateProduct(id, { name, description, weight, matter, stone, stone_number, jwgroup });
+            const result = await this.productService.updateProduct(id, { name, description, weight, matter, stone, stone_number, jwgroup, price });
 
             if(result instanceof Product) {
                 return res.status(HttpStatus.OK).json({data: result})

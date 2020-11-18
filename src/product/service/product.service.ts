@@ -60,8 +60,8 @@ export class ProductService {
         const exist = await this.findId(id);
 
         if (exist) {
-            await this.productRepository.query('update product set name =?, description =?, weight =?, matter =?, stone =?, stone_number =?, jwgroup =? where id =?', [
-                product.name, product.description, product.weight, product.matter, product.stone, product.stone_number, product.jwgroup, id]);
+            await this.productRepository.query('update product set name =?, description =?, weight =?, matter =?, stone =?, stone_number =?, jwgroup =?, price =? where id =?', [
+                product.name, product.description, product.weight, product.matter, product.stone, product.stone_number, product.jwgroup, product.price, id]);
 
             const result = await this.findId(id);
 

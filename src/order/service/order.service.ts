@@ -164,12 +164,14 @@ export class OrderService {
         if (found === 0) {
             // -- если нет заказа со статусом new, создаем новый заказ с первым продуктом
             order = await this.newOrder(productId);
+            
         } else {
             order = await this.getOrderById(found);
+            const product: any = await this.product.getProductById(productId);
 
             // -- если найден заказ со статусом new, добавляем продукт в существующий заказ
 
-            detail = this.defaultDetail(productId, found, 100);
+            detail = this.defaultDetail(productId, found, product.price);
             await this.createDtl(detail);
             await this.setHistoryStatus('detail', detail.current_status_id, detail.id);
 
