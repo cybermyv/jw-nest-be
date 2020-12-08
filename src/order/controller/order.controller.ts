@@ -206,6 +206,24 @@ export class OrderController {
             throw new HttpException('Error accept order', HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @Put(':id/updateOrderClient')
+    @HttpCode(200)
+    public async updateOrderClient(
+        @Param('id') id: number,
+        @Body() client: number,
+        @Res() res: Response
+    ) {
+        try {
+            const param = Object.values(client)[0];
+            const result = await this.orderService.updateClient(id, param);
+            
+            return res.status(HttpStatus.OK).json({data: result});
+        } catch(e) {
+            console.log(e);
+            throw new HttpException('Error update order client', HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
         
     
 }

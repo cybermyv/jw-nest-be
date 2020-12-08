@@ -12,9 +12,10 @@ import { ImgUploadModule } from './img-upload/img-upload.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { OrderModule } from './order/order.module';
+import { ClientsModule } from './clients/clients.module';
 
 @Module({
-  imports: [GroupModule,
+  imports: [
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: 'dbase/jwd.db',
@@ -27,14 +28,16 @@ import { OrderModule } from './order/order.module';
       //   destination: './upload'
       // })
     }),
-    ProductModule,
+    GroupModule,
     UserModule,
     AuthModule,
     DictModule,
     ImgUploadModule,
+    ProductModule,
     OrderModule,
+    ClientsModule,
   ],
   controllers: [AppController],
-  providers: [AppService,],
+  providers: [AppService]
 })
 export class AppModule { }

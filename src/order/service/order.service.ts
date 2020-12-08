@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/camelcase */
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -10,11 +10,7 @@ import { StatusDetailHistory } from '../dto/status-detail-history.dto';
 import { StatusOrderHistory } from '../dto/status-order-history.dto';
 
 import { ProductService } from 'src/product/service/product.service';
-import { Product } from 'src/product/dto/product.dto';
-
-
-
-
+import { ClientsService } from 'src/clients/service/clients.service';
 
 @Injectable()
 export class OrderService {
@@ -36,10 +32,9 @@ export class OrderService {
         private statusOrderRepository: Repository<StatusOrderHistory>,
 
         private product: ProductService,
-        // @InjectRepository(Product)
-        // private product: Repository<Product>,
-
-
+        
+        private client: ClientsService,
+        
     ) { }
 
     private async findNewOrder() {
@@ -184,13 +179,24 @@ export class OrderService {
         const currentStatusOrder = await this.getStatusById(order.current_status_id);
         data.order.currentStatusDescriptopn = currentStatusOrder.description;
         data.order.statusHistory = await this.getAllStatusByOrderId(order.id);
+
+        const client: any = await this.getClientById(order.client_id);
+        console.log('client', client);
+
+        order.client_name = client.fullname;
+        // data.order.client_name = '';
         // -- TODO - посчитать order.total_cost
 
         // -- получаем все детали по данному заказу.
         const detail$ = await this.getAllDetailByOrderId(order.id);
-      
-        data.order.detail = detail$;
+        
+        // console.log('summation',this.summation(detail$));
+        // console.log('summaByOrder', this.summaByOrder(order.id));
 
+        // data.summa = await this.summaByOrder(order.id);
+        // data.order.total_cost = data.summa;       
+        data.order.detail = detail$;    
+      
           await Promise.all(data.order.detail.map( async item => {  
             // -- добавляем статутс и иторию статусов
             const currentStatusDescriptopn =  await this.getStatusById(item.current_status_id);
@@ -211,20 +217,19 @@ export class OrderService {
 
 
     private async newOrder(productId: number): Promise<Order | string> {
-
-        // ПРОДУКТ
         const product: any = await this.product.getProductById(productId);
 
         if (product.id) {
-            const data = Object.assign({});
+            // const data = Object.assign({});
             // -- если изделие найдено, то продолжаем     
             const order = this.defaultOrder();
+            
             const newOrder = await this.createOrd(order);
-            const newOrderStausHistory = await this.setHistoryStatus('order', order.current_status_id, order.id);
+            await this.setHistoryStatus('order', order.current_status_id, order.id);
 
-            const detail = this.defaultDetail(product.id, newOrder.id, 100);
+            const detail = this.defaultDetail(product.id, newOrder.id, product.price);
             await this.createDtl(detail);
-            await this.setHistoryStatus('detail', detail.current_status_id, detail.id);
+            await this.setHistoryStatus('detail', detail.current_status_id, detail.id);           
 
             return newOrder;
         }
@@ -331,6 +336,8 @@ export class OrderService {
         if (exist) {
             await this.orderDetailRepository.query('update order_detail set price =? where id =?', [price, id]);
 
+            // cуммирование 
+
             return await this.findDetailById(id);
             
         } else {
@@ -362,7 +369,6 @@ export class OrderService {
         });
 
         const data: any = detail$;
-
         await Promise.all(data.map( async item => {
           const currentStatusDescriptopn =  await this.getStatusById(item.current_status_id);
           item.currentStatusDescriptopn =  currentStatusDescriptopn.description; 
@@ -414,7 +420,16 @@ export class OrderService {
         const currentStatusDescriptopn =  await this.getStatusById(order.current_status_id);
         order.currentStatusDescriptopn = currentStatusDescriptopn.description; 
 
+        const client: any = await this.getClientById(order.client_id);
+        console.log('client', client);
+
+        order.client_name = client.fullname;
+
         return order;
+    }
+
+    private async getClientById(id:number) {
+        return await this.client.getClientById(id)
     }
 
     public async getFullOrderById(id){
@@ -434,10 +449,47 @@ export class OrderService {
         }
     }
 
-    public async getPartialProduct (id: number) {
+    // private summation (detail: any) {
 
+    //     // суммируем цену по всем деталям заказа
+    //     // суммируем при добавлении в заказ, при удалении из заказа, при изменении цены в заказе
+
+    //     return detail.reduce((sum, item)=>{
+    //         return sum + item.price;
+    //     }, 0)
+
+    // }
+
+    private async summaByOrder(id: number) {   
+        // суммируем цену по всем деталям заказа
+        // суммируем при:
+        // [x] добавлении в заказ, 
+        // [ ] при удалении из заказа,
+        // [ ] при изменении цены в заказе    
+
+        const detail = await this.orderDetailRepository.find({
+            where: { order_id: id }
+        });
+
+        const summa = detail.reduce((sum, item)=>{
+            return sum + item.price;
+        }, 0);
+
+        console.log(summa);
+
+        return summa;
     }
 
+
+    public async updateClient(id: number, client_id: number) {
+        const exist = await this.getOrderById(id);
+
+        if(exist) {
+            await this.orderRepository.update(id, {client_id});
+             
+             return await this.getOrderAdditionalAtribute(id);
+         }
+    }
 
 
 }
